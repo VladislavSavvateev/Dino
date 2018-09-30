@@ -4,22 +4,22 @@
 
 StartOfRom:
 Vectors:
-		dc.l	$FFFE00,	EntryPoint,	ErrorTrap,	ErrorTrap			; $00 - $03 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $04 - $07 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $08 - $0B vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $0C - $0F vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $10 - $13 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $14 - $17 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $18 - $1B vectors
-		dc.l	HBlank,		ErrorTrap,	VBlank,		ErrorTrap			; $1C - $1F vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $20 - $23 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $24 - $27 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $28 - $2B vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $2C - $2F vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $30 - $33 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $34 - $37 vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $38 - $3B vectors
-		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap			; $3C - $3F vectors
+		dc.l	$FFFE00,	EntryPoint,	BusError,	AddressError
+		dc.l	IllegalInstr,	ZeroDivide,	ChkInstr,	TrapvInstr
+		dc.l	PrivilegeViol,	Trace,	Line1010Emu,	Line1111Emu
+		dc.l	ErrorExcept,	ErrorExcept,	ErrorExcept,	ErrorExcept
+		dc.l	ErrorExcept,	ErrorExcept,	ErrorExcept,	ErrorExcept
+		dc.l	ErrorExcept,	ErrorExcept,	ErrorExcept,	ErrorExcept
+		dc.l	ErrorExcept,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	HBlank,	ErrorTrap,	VBlank,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
+		dc.l	ErrorTrap,	ErrorTrap,	ErrorTrap,	ErrorTrap
 Console:	dc.b 'SEGA MEGA DRIVE '										; Console Name
 Date:		dc.b '(С)VS 2015.unk  '										; Release Date
 Title_Local:	dc.b '                                                '	; Local Title
@@ -200,6 +200,10 @@ MainGameLoop:
 ; ===========================================================================
 		include "_proc\Parallax Engine.asm"
 ; ===========================================================================
+; Debugger
+; ===========================================================================
+		include _proc\Debugger.asm
+; ===========================================================================
 ; VBLANK
 ; ===========================================================================
 		include	"_proc\VBLANK.asm"
@@ -223,7 +227,10 @@ MainGameLoop:
 ; Nemesis decompression	algorithm
 ; ===========================================================================
 		include	"_proc\Nemesis Decompression.asm"
-
+; ===========================================================================
+; Debugging Modules
+; ===========================================================================
+		include _proc\ErrorHandler.asm
 ; ===========================================================================
 ; Enigma decompression algorithm
 ; ===========================================================================
