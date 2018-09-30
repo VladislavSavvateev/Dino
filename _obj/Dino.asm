@@ -53,10 +53,11 @@ Obj_Dino_Control:
 		dc.w	@OnGround-@States	; $00
 		dc.w	@Jumping-@States	; $02
 		dc.w	@Falling-@States	; $04
+		dc.w	@Ducking-@States	; $06
 ; ---------------------------------------------------------------------------
 @OnGround:
 		andi.b	#A+B+C+Up,Joypad|Press	; any of this buttons pressed?
-		beq.s	@rts					; if not, branch
+		beq.s	@checkDuck				; if not, branch
 		addq.b	#2,$20(a0)				; next routine
 		move.b	#MAX_HEIGHT,$21(a0)		; set speed of jumping
 		
@@ -64,7 +65,15 @@ Obj_Dino_Control:
 		move.b	#2,$16(a0)	; load animation
 		
 		move.b	#$A9,d0		; move jump sound id to d0
-		jsr		PlaySound	; play sound
+		jmp		PlaySound	; play sound
+		
+@checkDuck
+		btst	#iDown,Joypad|Held	; down is pressed?
+		beq.s	@rts				; if not, branch
+		
+		move.b	#6,$20(a0)	; set Ducking state
+		move.b	#3,$11(a0)	; set duck animation
+		move.b	#2,$16(a0)	; load animation
 @rts	rts
 ; ---------------------------------------------------------------------------
 @Jumping:
@@ -105,7 +114,15 @@ Obj_Dino_Control:
 		
 @stillF	move.b	d0,$21(a0)	; set speed of jumping
 		rts
+; ---------------------------------------------------------------------------
+@Ducking:
+		btst	#iDown,Joypad|Held	; down is pressed?
+		bne.s	@rts				; if not, branch
 		
+		move.b	#0,$20(a0)	; set OnGround state
+		move.b	#0,$11(a0)	; set run animation
+		move.b	#2,$16(a0)	; load animation
+		rts
 ; ---------------------------------------------------------------------------
 ; Dino - Graphics
 ; ---------------------------------------------------------------------------
