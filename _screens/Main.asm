@@ -1,8 +1,10 @@
 ; =====================================================================
 ; Main Screen
 ; $FFFF1000 - action number
-; $FFFF1001 - timer
+; $FFFF1001 - score timer
 ; $FFFF1002 - score
+; $FFFF1006 - night flag
+; $FFFF1007 - pallete timer
 ; =====================================================================
 MainScreen:
 		lea		$C00004,a6	; load VDP
@@ -57,6 +59,7 @@ MainScreen_Action:
 		dc.w	@LogoUp-@Actions		; $02
 		dc.w	@HUD-@Actions			; $04
 		dc.w	@Nothing-@Actions		; $06
+		dc.w	@ChangePallete-@Actions	; $08
 ; ---------------------------------------------------------------------------
 @WaitForStart:
 		btst	#iStart,Joypad|Press	; if Start pressed?
@@ -128,7 +131,40 @@ MainScreen_Action:
 		lsr.l	#8,d0
 		bne.w	@rts			; if it isn't zero, branch
 		move.b	#$A1,d0			; move ok sound id to d0
-		jmp		PlaySound		; play sound				
+		jsr		PlaySound		; play sound			
+
+		move.l	$FFFF1002,d0	; get score
+		divu	#700,d0			; divide by 100
+		lsr.l	#8,d0			; get remainder
+		lsr.l	#8,d0			
+		bne.w	@rts			; if it isn't zero, branch
+		addq.b	#2,$FFFF1000	; next routine
+		move.b	#6,$FFFF1001	; set timer
+		
+		tst.b	$FFFF1006		; check night flag
+		bne.s	@nightOff		; if not zero, branch
+		LoadPal	MainNight_Pal, $80, 16
+		st.b	$FFFF1006
+		jmp		@rts
+		
+@nightOff
+		LoadPal	Main_Pal, $80, 16
+		sf.b	$FFFF1006
+		rts
+; ---------------------------------------------------------------------------
+@ChangePallete:
+		addq.l	#1,$FFFF1002	; add #1 to score
+		
+		subq.b	#1,$FFFF1001	; subtract #1 from timer
+		bne.w	@rts			; if it isn't a zero, branch
+		move.b	#6,$FFFF1001	; set timer
+		
+		moveq	#16,d0
+		jsr 	Pal_FadeTo		; call pallete routine
+		tst.b	d3				; check change counter
+		bne.w	@rts
+		subq.b	#2,$FFFF1000	; next routine
+		rts
 ; ---------------------------------------------------------------------------
 ; Parallax
 ; ---------------------------------------------------------------------------
@@ -156,6 +192,8 @@ Main_Map:
 		incbin	mapunc\background.bin
 Main_Pal:
 		incbin	pallete\dino.pal
+MainNight_Pal:
+		incbin	pallete\dino_night.pal
 		
 Logo_Art:
 		incbin	artunc\logo.bin
