@@ -5,7 +5,15 @@
 ; $FFFF1002 - score
 ; $FFFF1006 - night flag
 ; $FFFF1007 - pallete timer
+; $FFFF1008 - pallete flag
 ; =====================================================================
+Action			equ	$FFFF1000
+ScoreTimer		equ	$FFFF1001
+Score			equ	$FFFF1002
+NightFlag		equ	$FFFF1006
+PalleteTimer	equ	$FFFF1007
+PalleteFlag		equ	$FFFF1008
+
 MainScreen:
 		lea		$C00004,a6	; load VDP
 		move.w	#$8004,(a6)	; Reg#00: H-Int disabled, line counter disabled
@@ -18,7 +26,7 @@ MainScreen:
 		
 		; load background
 		LoadArtUnc	Main_Art, 1856, $0020
-		LoadPal		Main_Pal, $00, 16
+		LoadPal		Main_Pal, $80, 16
 		LoadMapUnc	Main_Map, 3584, $E000, 1, 64, 28
 		
 		; load foreground
@@ -35,22 +43,41 @@ MainScreen:
 		move.b	#$81,d0
 		jsr		PlaySound
 		
+		move.b	#0,PalleteFlag
+		move.b	#3,PalleteTimer
+		
 @loop
 		; wait for VBlank
 		move.b	#2,($FFFFF62A).w
 		jsr		DelayProgram
 
 		addq.w	#3,($FFFFFE04).w	; add #3 to level timer (parallax)
+		jsr		@PalTo
 		jsr		MainScreen_Parallax	; do parallax
 		jsr		MainScreen_Action	; do actions
 		jsr		ClearSprites		; clear sprites before creating some new
 		jsr		ObjectRun			; run object routines
 		
 		jmp		@loop				; loop
+; ---------------------------------------------------------------------------
+@PalTo:
+		sub.b	#1,PalleteTimer
+		beq.s	@cont
+		rts
 		
+@cont	move.b	#3,PalleteTimer
+		tst.b	PalleteFlag
+		bne.s	@rts
+		moveq	#16,d0
+		jsr		Pal_FadeTo
+		tst.b	d3
+		bne.s	@rts
+		st.b	PalleteFlag
+@rts	rts
+; ---------------------------------------------------------------------------
 MainScreen_Action:
 		moveq	#0,d0					; clear d0
-		move.b	$FFFF1000,d0			; move routine number
+		move.b	Action,d0			; move routine number
 		move.w	@Actions(pc,d0.w),d0	; get routine offset
 		jmp		@Actions(pc,d0.w)		; jump to the routine
 ; ---------------------------------------------------------------------------
@@ -65,7 +92,7 @@ MainScreen_Action:
 		btst	#iStart,Joypad|Press	; if Start pressed?
 		beq.s	@rts					; if not, branch
 		
-		addq.b	#2,$FFFF1000			; next routine
+		addq.b	#2,Action			; next routine
 		
 		move.b	#1,$FFFF8000			; create Dino object
 		move.w	#$58,$FFFF8008			; set start Dino's X-pos
@@ -83,7 +110,7 @@ MainScreen_Action:
 		rts
 
 @nextRoutine:	
-		addq.b	#2,$FFFF1000			; next routine
+		addq.b	#2,Action			; next routine
 		rts
 ; ---------------------------------------------------------------------------
 @HUD:	; first digit
@@ -116,16 +143,16 @@ MainScreen_Action:
 		move.w	#$90,$FFFF814C	; set Y-pos
 		move.b	#0,$FFFF8160	; set digit number
 		
-		addq.b	#2,$FFFF1000	; next routine
-		move.b	#6,$FFFF1001	; set timer
+		addq.b	#2,Action	; next routine
+		move.b	#6,ScoreTimer	; set timer
 ; ---------------------------------------------------------------------------
 @Nothing:	
-		subq.b	#1,$FFFF1001	; subtract #1 from timer
+		subq.b	#1,ScoreTimer	; subtract #1 from timer
 		bne.w	@rts			; if it isn't a zero, branch
-		addq.l	#1,$FFFF1002	; add #1 to score
-		move.b	#6,$FFFF1001	; set timer
+		addq.l	#1,Score	; add #1 to score
+		move.b	#6,ScoreTimer	; set timer
 		
-		move.l	$FFFF1002,d0	; get score
+		move.l	Score,d0	; get score
 		divu	#100,d0			; divide by 100
 		lsr.l	#8,d0			; get remainder
 		lsr.l	#8,d0
@@ -133,37 +160,37 @@ MainScreen_Action:
 		move.b	#$A1,d0			; move ok sound id to d0
 		jsr		PlaySound		; play sound			
 
-		move.l	$FFFF1002,d0	; get score
+		move.l	Score,d0	; get score
 		divu	#700,d0			; divide by 100
 		lsr.l	#8,d0			; get remainder
 		lsr.l	#8,d0			
 		bne.w	@rts			; if it isn't zero, branch
-		addq.b	#2,$FFFF1000	; next routine
-		move.b	#6,$FFFF1001	; set timer
+		addq.b	#2,Action	; next routine
+		move.b	#6,ScoreTimer	; set timer
 		
-		tst.b	$FFFF1006		; check night flag
+		tst.b	NightFlag		; check night flag
 		bne.s	@nightOff		; if not zero, branch
 		LoadPal	MainNight_Pal, $80, 16
-		st.b	$FFFF1006
+		st.b	NightFlag
 		jmp		@rts
 		
 @nightOff
 		LoadPal	Main_Pal, $80, 16
-		sf.b	$FFFF1006
+		sf.b	NightFlag
 		rts
 ; ---------------------------------------------------------------------------
 @ChangePallete:
-		addq.l	#1,$FFFF1002	; add #1 to score
+		addq.l	#1,Score	; add #1 to score
 		
-		subq.b	#1,$FFFF1001	; subtract #1 from timer
+		subq.b	#1,ScoreTimer	; subtract #1 from timer
 		bne.w	@rts			; if it isn't a zero, branch
-		move.b	#6,$FFFF1001	; set timer
+		move.b	#6,ScoreTimer	; set timer
 		
 		moveq	#16,d0
 		jsr 	Pal_FadeTo		; call pallete routine
 		tst.b	d3				; check change counter
 		bne.w	@rts
-		subq.b	#2,$FFFF1000	; next routine
+		subq.b	#2,Action	; next routine
 		rts
 ; ---------------------------------------------------------------------------
 ; Parallax

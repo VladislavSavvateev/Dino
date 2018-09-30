@@ -186,3 +186,13 @@ loc_2D04:				; XREF: CalcAngle
 Angle_Data:	incbin	misc\angles.bin
 
 ; ===========================================================================
+; ===========================================================================
+; Subroutine to clear Scroll RAM Buffer
+; Note:	corrupt the d7 content
+; ===========================================================================
+ClearScrollRAM:
+		lea		$FFFFCC00,a0
+		move.l	#223,d7
+@loop:	move.l	#0,(a0)+
+		dbf		d7,@loop
+		rts

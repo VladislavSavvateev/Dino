@@ -61,6 +61,7 @@ MegaPCM:
 	DAC_Entry	$15, Timpani, dpcm			; $88	- Mid-Timpani
 	DAC_Entry	$1B, Timpani, dpcm			; $88	- Mid-Low-Timpani
 	DAC_Entry	$1D, Timpani, dpcm			; $8A	- Low-Timpani
+	DAC_Entry	$01, SAVOOK, pcm+pri+panLR	; $8B	- SAVOOK
 
 MegaPCM_End:
 
@@ -71,4 +72,5 @@ MegaPCM_End:
 	IncludeDAC  kick, raw
 	IncludeDAC  Snare, raw
 	IncludeDAC	Timpani, bin
+	IncludeDAC	SAVOOK, wav
 	even
