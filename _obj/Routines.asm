@@ -10,7 +10,7 @@ ObjectRun:
 @loop:
 		moveq	#0,d0
 		move.b	(a0),d0
-		beq.s	@rts
+		beq.s	@next
 		subq.b	#1,d0
 		lea		ObjectOffsets,a1
 		add.w	d0,d0
@@ -18,9 +18,9 @@ ObjectRun:
 		adda.l	d0,a1
 		movea.l	(a1),a1
 		jsr		(a1)
-		lea		$40(a0),a0
+@next	lea		$40(a0),a0
 		dbf		d7,@loop
-@rts	rts
+		rts
 
 ; =====================================================================
 ; FindFreeObject - function for find free space in Object RAM
@@ -220,6 +220,7 @@ AnimateSprite:
 		
 ObjectOffsets:
 		dc.l	Obj_Dino
+		dc.l	Obj_Digit
 		
 ; =====================================================================
 ; Object Includes
