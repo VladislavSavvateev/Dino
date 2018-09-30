@@ -40,7 +40,7 @@ MainScreen:
 		move.b	#2,($FFFFF62A).w
 		jsr		DelayProgram
 
-		addq.w	#2,($FFFFFE04).w	; add #1 to level timer (parallax)
+		addq.w	#3,($FFFFFE04).w	; add #3 to level timer (parallax)
 		jsr		MainScreen_Parallax	; do parallax
 		jsr		MainScreen_Action	; do actions
 		jsr		ClearSprites		; clear sprites before creating some new
@@ -79,7 +79,7 @@ MainScreen_Action:
 @checkDino:
 		cmp.w	#146,ScrollBuffer|Y_A	; if logo above the screen?
 		beq.s	@nextRoutine			; if yes, branch
-		addq.w	#1,ScrollBuffer|Y_A		; if not, move logo
+		addq.w	#2,ScrollBuffer|Y_A		; if not, move logo
 		rts
 
 @nextRoutine:	
@@ -181,7 +181,8 @@ MainScreen_Parallax:
 		dc.w	_moving|$04,	$0100,		16
 		dc.w	_moving|$03,	$0100,		16
 		dc.w	_moving|$02,	$0100,		16
-		dc.w	_moving,		$0100,		43
+		dc.w	_moving|$01,	$0100,		29
+		dc.w	_moving,		$0100,		14
 		dc.w	-1
 ; ---------------------------------------------------------------------------
 ; Main Screen - Graphics
