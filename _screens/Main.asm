@@ -25,7 +25,7 @@ MainScreen:
 		LoadArtUnc	Dino_Art, 1600, $1E60
 		
 		; load digits
-		LoadArtUnc	
+		LoadArtUnc	Digit_Art, 384, $24A0
 		
 		; play music
 		move.b	#$81,d0
