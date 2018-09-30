@@ -121,8 +121,14 @@ MainScreen_Action:
 		bne.w	@rts			; if it isn't a zero, branch
 		addq.l	#1,$FFFF1002	; add #1 to score
 		move.b	#6,$FFFF1001	; set timer
-		rts
-				
+		
+		move.l	$FFFF1002,d0	; get score
+		divu	#100,d0			; divide by 100
+		lsr.l	#8,d0			; get remainder
+		lsr.l	#8,d0
+		bne.w	@rts			; if it isn't zero, branch
+		move.b	#$A1,d0			; move ok sound id to d0
+		jmp		PlaySound		; play sound				
 ; ---------------------------------------------------------------------------
 ; Parallax
 ; ---------------------------------------------------------------------------
