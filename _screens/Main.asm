@@ -34,98 +34,101 @@ MainScreen:
 		jsr		PlaySound
 		
 @loop
+		; wait for VBlank
 		move.b	#2,($FFFFF62A).w
 		jsr		DelayProgram
+
+		addq.w	#2,($FFFFFE04).w	; add #1 to level timer (parallax)
+		jsr		MainScreen_Parallax	; do parallax
+		jsr		MainScreen_Action	; do actions
+		jsr		ClearSprites		; clear sprites before creating some new
+		jsr		ObjectRun			; run object routines
 		
-		addq.w	#2,($FFFFFE04).w
-		jsr		MainScreen_Parallax
-		jsr		MainScreen_Action
-		jsr		ClearSprites
-		jsr		ObjectRun
-		
-		jmp		@loop
+		jmp		@loop				; loop
 		
 MainScreen_Action:
-		moveq	#0,d0
-		move.b	$FFFF1000,d0
-		move.w	@Actions(pc,d0.w),d0
-		jmp		@Actions(pc,d0.w)
+		moveq	#0,d0					; clear d0
+		move.b	$FFFF1000,d0			; move routine number
+		move.w	@Actions(pc,d0.w),d0	; get routine offset
+		jmp		@Actions(pc,d0.w)		; jump to the routine
 ; ---------------------------------------------------------------------------
 @Actions:
-		dc.w	@WaitForStart-@Actions
-		dc.w	@LogoUp-@Actions
-		dc.w	@HUD-@Actions
-		dc.w	@Nothing-@Actions
+		dc.w	@WaitForStart-@Actions	; $00
+		dc.w	@LogoUp-@Actions		; $02
+		dc.w	@HUD-@Actions			; $04
+		dc.w	@Nothing-@Actions		; $06
 ; ---------------------------------------------------------------------------
 @WaitForStart:
-		btst	#iStart,Joypad|Press
-		beq.s	@rts
-		addq.b	#2,$FFFF1000
-		move.b	#1,$FFFF8000
-		move.w	#$58,$FFFF8008
+		btst	#iStart,Joypad|Press	; if Start pressed?
+		beq.s	@rts					; if not, branch
+		
+		addq.b	#2,$FFFF1000			; next routine
+		
+		move.b	#1,$FFFF8000			; create Dino object
+		move.w	#$58,$FFFF8008			; set start Dino's X-pos
 @rts	rts
 ; ---------------------------------------------------------------------------
 @LogoUp:		
-		cmp.w	#$96,$FFFF8008
-		beq.s	@checkDino
-		addq.w	#1,$FFFF8008
+		cmp.w	#$96,$FFFF8008			; if Dino at right X-pos?
+		beq.s	@checkDino				; if yes, branch
+		addq.w	#1,$FFFF8008			; if not, move Dino
 		
 @checkDino:
-		cmp.w	#146,ScrollBuffer|Y_A
-		beq.s	@nextRoutine
-		addq.w	#1,ScrollBuffer|Y_A
+		cmp.w	#146,ScrollBuffer|Y_A	; if logo above the screen?
+		beq.s	@nextRoutine			; if yes, branch
+		addq.w	#1,ScrollBuffer|Y_A		; if not, move logo
 		rts
 
 @nextRoutine:	
-		addq.b	#2,$FFFF1000
+		addq.b	#2,$FFFF1000			; next routine
 		rts
 ; ---------------------------------------------------------------------------
 @HUD:	; first digit
-		move.b	#2,$FFFF8040
-		move.w	#$188,$FFFF8048
-		move.w	#$90,$FFFF804C
-		move.b	#4,$FFFF8060
+		move.b	#2,$FFFF8040	; create digit object
+		move.w	#$188,$FFFF8048	; set X-pos
+		move.w	#$90,$FFFF804C	; set Y-pos
+		move.b	#4,$FFFF8060	; set digit number
 		
 		; second digit
-		move.b	#2,$FFFF8080
-		move.w	#$190,$FFFF8088
-		move.w	#$90,$FFFF808C
-		move.b	#3,$FFFF80A0
+		move.b	#2,$FFFF8080	; create digit object
+		move.w	#$190,$FFFF8088	; set X-pos
+		move.w	#$90,$FFFF808C	; set Y-pos
+		move.b	#3,$FFFF80A0	; set digit number
 		
 		; third digit
-		move.b	#2,$FFFF80C0
-		move.w	#$198,$FFFF80C8
-		move.w	#$90,$FFFF80CC
-		move.b	#2,$FFFF80E0
+		move.b	#2,$FFFF80C0	; create digit object
+		move.w	#$198,$FFFF80C8	; set X-pos
+		move.w	#$90,$FFFF80CC	; set Y-pos
+		move.b	#2,$FFFF80E0	; set digit number
 		
 		; fourth digit
-		move.b	#2,$FFFF8100
-		move.w	#$1A0,$FFFF8108
-		move.w	#$90,$FFFF810C
-		move.b	#1,$FFFF8120
+		move.b	#2,$FFFF8100	; create digit object
+		move.w	#$1A0,$FFFF8108	; set X-pos
+		move.w	#$90,$FFFF810C	; set Y-pos
+		move.b	#1,$FFFF8120	; set digit number
 		
 		; fiveth digit
-		move.b	#2,$FFFF8140
-		move.w	#$1A8,$FFFF8148
-		move.w	#$90,$FFFF814C
-		move.b	#0,$FFFF8160
+		move.b	#2,$FFFF8140	; create digit object
+		move.w	#$1A8,$FFFF8148	; set X-pos
+		move.w	#$90,$FFFF814C	; set Y-pos
+		move.b	#0,$FFFF8160	; set digit number
 		
-		addq.b	#2,$FFFF1000
-		move.b	#6,$FFFF1001
+		addq.b	#2,$FFFF1000	; next routine
+		move.b	#6,$FFFF1001	; set timer
 ; ---------------------------------------------------------------------------
 @Nothing:	
-		subq.b	#1,$FFFF1001
-		bne.w	@rts
-		addq.l	#1,$FFFF1002
-		move.b	#6,$FFFF1001		
+		subq.b	#1,$FFFF1001	; subtract #1 from timer
+		bne.w	@rts			; if it isn't a zero, branch
+		addq.l	#1,$FFFF1002	; add #1 to score
+		move.b	#6,$FFFF1001	; set timer
 		rts
 				
 ; ---------------------------------------------------------------------------
 ; Parallax
 ; ---------------------------------------------------------------------------
 MainScreen_Parallax:
-		lea	@ParallaxScript,a1
-		jmp	ExecuteParallaxScript
+		lea		@ParallaxScript,a1		; load parallax params
+		jmp		ExecuteParallaxScript	; run parallax engine
 ; ---------------------------------------------------------------
 @ParallaxScript:
 		;		Mode			Speed coef.	Number of lines
