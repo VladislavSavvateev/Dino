@@ -24,7 +24,7 @@ Obj_Dino:
 		dc.w	@Main-@Routines	; $00
 		dc.w	@Loop-@Routines	; $02
 ; ---------------------------------------------------------------------------
-Obj_Dino_Main:
+@Main:
 		addq.b	#2,1(a0)			; next routine
 		move.w	#243,2(a0)			; art pointer
 		;move.w	#$96,8(a0)			; X
@@ -34,7 +34,7 @@ Obj_Dino_Main:
 		move.b	#0,$11(a0)			; set run animation
 		move.b	#2,$16(a0)			; load animation
 
-Obj_Dino_Loop:
+@Loop:
 		jsr		Obj_Dino_Control	; do control
 		jsr		AnimateSprite		; animate sprite
 		jmp		DisplaySprite		; display sprite
@@ -62,6 +62,9 @@ Obj_Dino_Control:
 		
 		move.b	#1,$11(a0)	; set stand animation
 		move.b	#2,$16(a0)	; load animation
+		
+		move.b	#$A9,d0		; move jump sound id to d0
+		jsr		PlaySound	; play sound
 @rts	rts
 ; ---------------------------------------------------------------------------
 @Jumping:
@@ -86,21 +89,21 @@ Obj_Dino_Control:
 		moveq	#0,d0		; clear d0
 		move.b	$21(a0),d0	; get speed of jumping
 		cmp.b	#GRAVITY,d0	; it's more than gravity?
-		ble.s	@ok			; if not, branch
+		ble.s	@okF		; if not, branch
 		move.b	#GRAVITY,d0	; limit speed to gravity
 		
-@ok		add.w	d0,$C(a0)			; add speed to Y-pos
+@okF	add.w	d0,$C(a0)			; add speed to Y-pos
 		move.b	$21(a0),d0			; get speed of jumping
 		addi.b	#1,d0				; increment it
 		cmp.b	#MAX_HEIGHT+1,d0	; speed is equal to max_height+1?
-		bne.s	@still				; if not, branch
+		bne.s	@stillF				; if not, branch
 		
 		move.b	#0,$20(a0)	; set OnGround state
 		move.b	#0,d0		
 		move.b	#0,$11(a0)	; set run animation
 		move.b	#2,$16(a0)	; load animation
 		
-@still	move.b	d0,$21(a0)	; set speed of jumping
+@stillF	move.b	d0,$21(a0)	; set speed of jumping
 		rts
 		
 ; ---------------------------------------------------------------------------
