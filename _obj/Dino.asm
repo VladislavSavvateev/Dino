@@ -77,6 +77,9 @@ Obj_Dino_Control:
 @rts	rts
 ; ---------------------------------------------------------------------------
 @Jumping:
+		btst	#iDown,Joypad|Held	; down is pressed?
+		bne.s	@duck				; if not, branch
+		
 		moveq	#0,d0		; clear d0
 		move.b	$21(a0),d0	; get speed of jumping
 		cmp.b	#GRAVITY,d0	; it's more than gravity?
@@ -87,8 +90,12 @@ Obj_Dino_Control:
 		move.b	$21(a0),d0	; get speed of jumping
 		subi.b	#1,d0		; decrement it
 		bne.s	@still		; if it's more than zero, branch
+		jmp		@next
 		
-		addq.b	#2,$20(a0)	; next routine
+@duck	move.b	#3,$11(a0)	; set duck animation
+		move.b	#2,$16(a0)	; load animation
+		
+@next	addq.b	#2,$20(a0)	; next routine
 		move.b	#1,d0		
 		
 @still	move.b	d0,$21(a0)	; set speed of jumping
@@ -96,18 +103,36 @@ Obj_Dino_Control:
 ; ---------------------------------------------------------------------------
 @Falling:
 		moveq	#0,d0		; clear d0
-		move.b	$21(a0),d0	; get speed of jumping
+		
+		btst	#iDown,Joypad|Held	; down is pressed?
+		beq.w	@nGr				; if no, branch
+		move.b	#GRAVITY+2,d0		; MORE GRAVITY
+		
+		cmp.b	#3,$11(a0)	; ducking animation is already showing?
+		beq.s	@j			; if yes, branch
+		move.b	#3,$11(a0)	; set duck animation
+		move.b	#2,$16(a0)	; load animation
+		
+@j		jmp		@okF			; apply speed
+		
+@nGr	move.b	$21(a0),d0	; get speed of jumping
 		cmp.b	#GRAVITY,d0	; it's more than gravity?
 		ble.s	@okF		; if not, branch
 		move.b	#GRAVITY,d0	; limit speed to gravity
 		
-@okF	add.w	d0,$C(a0)			; add speed to Y-pos
-		move.b	$21(a0),d0			; get speed of jumping
-		addi.b	#1,d0				; increment it
-		cmp.b	#MAX_HEIGHT+1,d0	; speed is equal to max_height+1?
+@okF	add.w	d0,$C(a0)	; add speed to Y-pos
+		move.b	$21(a0),d0	; get speed of jumping
+		addi.b	#1,d0		; increment it
+		
+		cmp.w	#$130,$C(a0)	; Dino fall into ground?
+		blt.w	@contF			; if not, branch
+		move.w	#$130,$C(a0)	; set normal Y
+		jmp		@nextF			; next routine
+		
+@contF	cmp.b	#MAX_HEIGHT+1,d0	; speed is equal to max_height+1?
 		bne.s	@stillF				; if not, branch
 		
-		move.b	#0,$20(a0)	; set OnGround state
+@nextF	move.b	#0,$20(a0)	; set OnGround state
 		move.b	#0,d0		
 		move.b	#0,$11(a0)	; set run animation
 		move.b	#2,$16(a0)	; load animation
@@ -117,7 +142,7 @@ Obj_Dino_Control:
 ; ---------------------------------------------------------------------------
 @Ducking:
 		btst	#iDown,Joypad|Held	; down is pressed?
-		bne.s	@rts				; if not, branch
+		bne.w	@rts				; if yes, branch
 		
 		move.b	#0,$20(a0)	; set OnGround state
 		move.b	#0,$11(a0)	; set run animation
