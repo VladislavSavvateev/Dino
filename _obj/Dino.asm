@@ -111,8 +111,6 @@ Obj_Dino_Control:
 ; ---------------------------------------------------------------------------
 Dino_Art:
 		incbin	artunc\dino.bin
-Dino_Pal:
-		incbin	pallete\dino.pal
 Dino_Map:
 		include	_maps\Dino.asm
 Dino_Anim:
