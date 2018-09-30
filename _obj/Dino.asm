@@ -55,10 +55,13 @@ Obj_Dino_Control_States:
 		dc.w	Obj_Dino_Control_Falling-Obj_Dino_Control_States
 ; ---------------------------------------------------------------------------
 Obj_Dino_Control_OnGround:
-		andi.b	#A+B+C,Joypad|Press
+		andi.b	#A+B+C+Up,Joypad|Press
 		beq.s	@rts
 		addq.b	#2,$20(a0)
 		move.b	#MAX_HEIGHT,$21(a0)
+		
+		move.b	#1,$11(a0)			; set stand animation
+		move.b	#2,$16(a0)			; load animation
 @rts	rts
 ; ---------------------------------------------------------------------------
 Obj_Dino_Control_Jumping:
@@ -89,6 +92,8 @@ Obj_Dino_Control_Falling:
 		bne.s	@still
 		move.b	#0,$20(a0)
 		move.b	#0,d0
+		move.b	#0,$11(a0)			; set run animation
+		move.b	#2,$16(a0)			; load animation
 @still	move.b	d0,$21(a0)
 		rts
 		
