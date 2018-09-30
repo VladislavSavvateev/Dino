@@ -1,6 +1,7 @@
 ; =====================================================================
 ; Main Screen
 ; $FFFF1000 - action number
+; $FFFF1001 - timer
 ; $FFFF1002 - score
 ; =====================================================================
 MainScreen:
@@ -53,6 +54,7 @@ MainScreen_Action:
 @Actions:
 		dc.w	@WaitForStart-@Actions
 		dc.w	@LogoUp-@Actions
+		dc.w	@HUD-@Actions
 		dc.w	@Nothing-@Actions
 ; ---------------------------------------------------------------------------
 @WaitForStart:
@@ -78,7 +80,44 @@ MainScreen_Action:
 		addq.b	#2,$FFFF1000
 		rts
 ; ---------------------------------------------------------------------------
-@Nothing:
+@HUD:	; first digit
+		move.b	#2,$FFFF8040
+		move.w	#$188,$FFFF8048
+		move.w	#$90,$FFFF804C
+		move.b	#4,$FFFF8060
+		
+		; second digit
+		move.b	#2,$FFFF8080
+		move.w	#$190,$FFFF8088
+		move.w	#$90,$FFFF808C
+		move.b	#3,$FFFF80A0
+		
+		; third digit
+		move.b	#2,$FFFF80C0
+		move.w	#$198,$FFFF80C8
+		move.w	#$90,$FFFF80CC
+		move.b	#2,$FFFF80E0
+		
+		; fourth digit
+		move.b	#2,$FFFF8100
+		move.w	#$1A0,$FFFF8108
+		move.w	#$90,$FFFF810C
+		move.b	#1,$FFFF8120
+		
+		; fiveth digit
+		move.b	#2,$FFFF8140
+		move.w	#$1A8,$FFFF8148
+		move.w	#$90,$FFFF814C
+		move.b	#0,$FFFF8160
+		
+		addq.b	#2,$FFFF1000
+		move.b	#6,$FFFF1001
+; ---------------------------------------------------------------------------
+@Nothing:	
+		subq.b	#1,$FFFF1001
+		bne.w	@rts
+		addq.l	#1,$FFFF1002
+		move.b	#6,$FFFF1001		
 		rts
 				
 ; ---------------------------------------------------------------------------
