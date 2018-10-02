@@ -174,18 +174,22 @@ GameInit:
 GameClrRAM:
 		move.l	d7,(a6)+
 		dbf	d6,GameClrRAM	; fill RAM ($0000-$FDFF) with $0
-		bsr.w	VDPSetupGame
-		bsr.w	SoundDriverLoad
+		jsr		VDPSetupGame
+		jsr		SoundDriverLoad
 		jsr		UpdateMusic
-		bsr.w	JoypadInit
+		jsr		JoypadInit
 		move.b	#0,($FFFFF600).w ; set Game Mode to Sega Screen
 
 ; ===========================================================================
 MainGameLoop:
+		jsr		CutsceneScreen
 		jsr 	SavokScreen
 		jsr		MainScreen
 		bra.s	MainGameLoop
-
+; ===========================================================================
+; Cutscene Screen
+; ===========================================================================
+		include	_screens\Cutscene.asm
 ; ===========================================================================
 ; Savok Screen
 ; ===========================================================================
