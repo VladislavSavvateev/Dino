@@ -10,6 +10,9 @@
 ;		#2 - falling down
 ;	$21 - vertical speed
 ;	$22 - "control block" flag
+;	$23 - custom animation
+;	$24	- custom Y
+;	$26 - custom artpointer
 ; ===========================================================================
 GRAVITY equ 9
 MAX_HEIGHT equ 18
@@ -26,13 +29,28 @@ Obj_Dino:
 ; ---------------------------------------------------------------------------
 @Main:
 		addq.b	#2,1(a0)			; next routine
-		move.w	#243,2(a0)			; art pointer
-		;move.w	#$96,8(a0)			; X
-		move.w	#$130,$C(a0)		; Y
-		move.l	#Dino_Map,4(a0)		; mapping
+		move.w	$26(a0),d0			; get custom artpointer
+		beq.s	@sAr				; if it's zero, branch
+		move.w	d0,2(a0)			; move custom artpointer to artpointer
+		jmp		@Y
+@sAr	move.w	#243,2(a0)			; art pointer
+		;move.w	#$96,8(a0)			; X	
+		
+@Y		move.w	$24(a0),d0			; get custom Y
+		beq.s	@sY					; if it's zero, branch
+		move.w	d0,$C(a0)			; move custom Y to Y
+		jmp		@next				; jump
+@sY		move.w	#$130,$C(a0)		; else set standart Y
+
+@next	move.l	#Dino_Map,4(a0)		; mapping
 		move.l	#Dino_Anim,$12(a0)	; animations
-		move.b	#0,$11(a0)			; set run animation
-		move.b	#2,$16(a0)			; load animation
+		
+		move.b	$23(a0),d0			; get custom animation
+		beq.s	@sA					; if it's zero, branch
+		move.b	d0,$11(a0)			; move custom animation to animation offset
+		jmp		@runA
+@sA		move.b	#0,$11(a0)			; set run animation
+@runA	move.b	#2,$16(a0)			; load animation
 
 @Loop:
 		jsr		Obj_Dino_Control	; do control

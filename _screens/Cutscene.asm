@@ -75,6 +75,7 @@ CutsceneScreen_Loop:
 		dc.w	@FadeIn-@Actions
 		dc.w	@LoadNewArt-@Actions
 		dc.w	@FadeIn-@Actions
+		dc.w	@WaitForDino-@Actions
 		dc.w	@rts-@Actions
 ; ---------------------------------------------------------------------------
 @FadeIn:
@@ -108,6 +109,7 @@ CutsceneScreen_Loop:
 		LoadPal		Cutscene_Pal2, $80, 16
 		
 		LoadArtUnc	Dots_Art, 288, $0EA0
+		LoadArtUnc	Dino_Art, 1600, $0FC0
 		LoadPal		Main_Pal, $A0, 16
 		
 		move.b	#3,$FFFF8000
@@ -116,6 +118,9 @@ CutsceneScreen_Loop:
 		move.w	#3,$FFFF3004	; set timer
 		
 		rts
+; ---------------------------------------------------------------------------
+@WaitForDino:
+		
 ; ---------------------------------------------------------------------------
 @rts:
 		rts
