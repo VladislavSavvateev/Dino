@@ -182,8 +182,8 @@ GameClrRAM:
 
 ; ===========================================================================
 MainGameLoop:
-		jsr		CutsceneScreen
 		jsr 	SavokScreen
+		jsr		CutsceneScreen
 		jsr		MainScreen
 		bra.s	MainGameLoop
 ; ===========================================================================
