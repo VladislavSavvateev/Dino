@@ -78,7 +78,7 @@ Obj_Dino_Control:
 ; ---------------------------------------------------------------------------
 @Jumping:
 		btst	#iDown,Joypad|Held	; down is pressed?
-		bne.s	@duck				; if not, branch
+		bne.s	@next				; if not, branch
 		
 		moveq	#0,d0		; clear d0
 		move.b	$21(a0),d0	; get speed of jumping
@@ -90,10 +90,6 @@ Obj_Dino_Control:
 		move.b	$21(a0),d0	; get speed of jumping
 		subi.b	#1,d0		; decrement it
 		bne.s	@still		; if it's more than zero, branch
-		jmp		@next
-		
-@duck	move.b	#3,$11(a0)	; set duck animation
-		move.b	#2,$16(a0)	; load animation
 		
 @next	addq.b	#2,$20(a0)	; next routine
 		move.b	#1,d0		
@@ -106,14 +102,8 @@ Obj_Dino_Control:
 		
 		btst	#iDown,Joypad|Held	; down is pressed?
 		beq.w	@nGr				; if no, branch
-		move.b	#GRAVITY+2,d0		; MORE GRAVITY
-		
-		cmp.b	#3,$11(a0)	; ducking animation is already showing?
-		beq.s	@j			; if yes, branch
-		move.b	#3,$11(a0)	; set duck animation
-		move.b	#2,$16(a0)	; load animation
-		
-@j		jmp		@okF			; apply speed
+		move.b	#GRAVITY+2,d0		; MORE GRAVITY		
+		jmp		@okF				; apply speed
 		
 @nGr	move.b	$21(a0),d0	; get speed of jumping
 		cmp.b	#GRAVITY,d0	; it's more than gravity?
