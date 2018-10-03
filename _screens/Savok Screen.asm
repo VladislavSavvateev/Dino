@@ -56,6 +56,9 @@ SavokScreen_Loop:
 		move.b	#4,Timer1	; set timers
 		move.b	#2,Timer2		
 		
+		moveq	#$FFFFFF80,d0
+		jsr		PlaySample
+		
 		jmp		ClearReservedPallete		
 @rts	rts
 ; ---------------------------------------------------------------------------
