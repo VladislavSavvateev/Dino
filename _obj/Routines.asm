@@ -92,7 +92,6 @@ GetSpritesCount:
 ; Return:		none
 ; =====================================================================
 DisplaySprite:
-		jsr		FindFreeSprite	; try to find free space for sprite
 		movea.l	4(a0),a2		; load object mappings
 		moveq	#0,d0			; clear d0
 		move.b	$10(a0),d0		; load current frame
@@ -106,10 +105,12 @@ DisplaySprite:
 		; adda.l	d0,a2			; get 
 		
 		adda.w	(a2,d0.w),a2	; get mapping
-		moveq	#0,d0			; clear d0
-		move.b	(a2)+,d0		; get number of sprites
-		subq.b	#1,d0			; subtract 1
+		moveq	#0,d2			; clear d2
+		move.b	(a2)+,d2		; get number of sprites
+		beq.s	@rts
+		subq.b	#1,d2			; subtract 1
 @loop:
+		jsr		FindFreeSprite	; try to find free space for sprite
 		moveq	#0,d1			; clear d1
 		move.b	(a2)+,d1		; get Y-pos from mapping
 		ext.w	d1				; extend word
@@ -131,8 +132,8 @@ DisplaySprite:
 		move.b	(a2)+,d1		; get X-pos from mapping
 		add.w	$8(a0),d1		; add X-pos from object
 		move.w	d1,(a1)+		; move X-pos
-		dbf		d0,@loop		; loop
-		rts						; return
+		dbf		d2,@loop		; loop
+@rts	rts						; return
 		
 		
 SpeedToPos:
@@ -236,6 +237,7 @@ ObjectOffsets:
 		dc.l	Obj_Dino
 		dc.l	Obj_Digit
 		dc.l	Obj_Dots
+		dc.l	Obj_Cactus
 		
 ; =====================================================================
 ; Object Includes
@@ -243,3 +245,4 @@ ObjectOffsets:
 		include	_obj\Dino.asm
 		include _obj\Digit.asm
 		include	_obj\Dots.asm
+		include	_obj\Cactus.asm

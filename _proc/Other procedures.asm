@@ -62,6 +62,7 @@ Joypad_Read:
 
 
 DelayProgram:				; XREF: PauseGame
+		jsr		RandomNumber
 		move	#$2300,sr	; отключение прерываний
 	@wait:	tst.b	($FFFFF62A).w	; has VBlank routine finished?
 		bne.s	@wait		; если нет, бранч
