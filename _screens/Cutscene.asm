@@ -39,9 +39,22 @@ CutsceneScreen_Loop:
 		jsr		ObjectRun
 		
 		jsr		@Blink
+		jsr		@WaitForStart
 		jsr		@Action
 		
-		jmp		CutsceneScreen_Loop
+		cmp.b	#$1A,$FFFF3002
+		bne.s	CutsceneScreen_Loop
+		rts
+; ---------------------------------------------------------------------------
+@WaitForStart:
+		cmp.b	#$10,$FFFF3002
+		bge.w	@rts
+		
+		btst	#iStart,Joypad|Press
+		beq.w	@rts
+		move.b	#$10,$FFFF3002
+		moveq	#$FFFFFF80,d0
+		jmp		PlaySample
 ; ---------------------------------------------------------------------------
 @Blink:
 		cmp.b	#4,$FFFF3002
@@ -70,13 +83,20 @@ CutsceneScreen_Loop:
 		jmp		@Actions(pc,d0.w)
 ; ---------------------------------------------------------------------------
 @Actions:
-		dc.w	@FadeIn-@Actions
-		dc.w	@Wait-@Actions
-		dc.w	@FadeIn-@Actions
-		dc.w	@LoadNewArt-@Actions
-		dc.w	@FadeIn-@Actions
-		dc.w	@WaitForDino-@Actions
-		dc.w	@rts-@Actions
+		dc.w	@FadeIn-@Actions		; $00
+		dc.w	@Wait-@Actions			; $02
+		dc.w	@FadeIn-@Actions		; $04
+		dc.w	@LoadNewArt-@Actions	; $06
+		dc.w	@FadeIn-@Actions		; $08
+		dc.w	@WaitForDino-@Actions	; $0A
+		dc.w	@Wait-@Actions			; $0C
+		dc.w	@FadeIn-@Actions		; $0E
+		dc.w	@FillDinoPal-@Actions	; $10
+		dc.w	@Wait-@Actions			; $12
+		dc.w	@FadeIn-@Actions		; $14
+		dc.w	@RemoveDino-@Actions	; $16
+		dc.w	@Wait-@Actions			; $18
+		dc.w	@rts-@Actions			; $1A
 ; ---------------------------------------------------------------------------
 @FadeIn:
 		subq.w	#1,$FFFF3004	; subtract #1 from timer
@@ -120,9 +140,36 @@ CutsceneScreen_Loop:
 		rts
 ; ---------------------------------------------------------------------------
 @WaitForDino:
+		cmp.b	#1,$FFFF8000	; first object is Dino?
+		bne.s	@rts			; if not, branch
 		
+		addq.b	#2,$FFFF3002	; next routine
+		move.w	#120,$FFFF3004	; set timer
+		
+		LoadPal	Main_Pal, $A0, 16
+		moveq	#7,d0
+		lea		$FFFFFB80,a0	; load needed line
+		jmp		@FillPalWhite	; fill reserved pal with white
+; ---------------------------------------------------------------------------
+@FillDinoPal:		
+		addq.b	#2,$FFFF3002	; next routine
+		move.w	#60,$FFFF3004	; set timer
+		moveq	#15,d0
+		lea		$FFFFFB80,a0	; load needed line
+		jmp		@FillPalWhite	; fill reserved pal with white		
+; ---------------------------------------------------------------------------
+@RemoveDino:
+		addq.b	#2,$FFFF3002	; next routine
+		move.w	#60,$FFFF3004	; set timer
+		lea		$FFFF8000,a0
+		jmp		DeleteObject
 ; ---------------------------------------------------------------------------
 @rts:
+		rts
+; ---------------------------------------------------------------------------
+@FillPalWhite:
+		move.l	#$0EEE0EEE,(a0)+
+		dbf		d0,@FillPalWhite
 		rts
 ; ===========================================================================
 ; Graphic Data
