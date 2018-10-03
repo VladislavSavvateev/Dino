@@ -192,7 +192,7 @@ Svk_PalletFade:
 @rts	rts
 ; ===========================================================================
 ClearReservedPallete:
-		moveq	#7,d0			; set loop count
+		moveq	#15,d0			; set loop count
 		lea		$FFFFFB80,a0	; load reserved pallete
 @cl		move.l	#0,(a0)+		; send zero to RAM
 		dbf		d0,@cl			; loop
