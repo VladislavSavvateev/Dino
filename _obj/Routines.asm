@@ -39,6 +39,17 @@ FindFreeObject:
 		dbf		d7,@loop		; if it's last object, exit loop 
 @rts	rts						; return
 
+; ===========================================================================
+; DeleteObject - procedure for deleting object
+; Arguments:	a0 - object
+; Return:		nothing
+; ===========================================================================
+DeleteObject:
+		moveq	#$F,d0
+@loop:	move.l	#0,(a0)+
+		dbf		d0,@loop
+		rts
+		
 ; =====================================================================
 ; FindFreeSprite - function for find free space in Sprite RAM
 ; Arguments:	none
@@ -101,13 +112,16 @@ DisplaySprite:
 @loop:
 		moveq	#0,d1			; clear d1
 		move.b	(a2)+,d1		; get Y-pos from mapping
+		ext.w	d1				; extend word
 		add.w	$C(a0),d1		; add Y-pos from object
 		move.w	d1,(a1)+		; move Y-pos
 		moveq	#0,d1			; clear d1
 		move.b	(a2)+,(a1)+		; move size
+		
 		move.b	-8(a1),d1		; get link from previous sprite
 		add.b	#1,d1			; increment link
 		move.b	d1,(a1)+		; move link
+
 		move.b	(a2)+,d1		; get art pointer from mapping
 		lsl.w	#8,d1			; I hate Sega Genesis for his unable
 		move.b	(a2)+,d1		; to read/write a words from non-odd address
@@ -221,9 +235,11 @@ AnimateSprite:
 ObjectOffsets:
 		dc.l	Obj_Dino
 		dc.l	Obj_Digit
+		dc.l	Obj_Dots
 		
 ; =====================================================================
 ; Object Includes
 ; =====================================================================
 		include	_obj\Dino.asm
 		include _obj\Digit.asm
+		include	_obj\Dots.asm
