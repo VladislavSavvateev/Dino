@@ -57,23 +57,23 @@ CutsceneScreen_Loop:
 		jmp		PlaySample
 ; ---------------------------------------------------------------------------
 @Blink:
-		cmp.b	#4,$FFFF3002
-		bge.w	@rts
+		cmp.b	#4,$FFFF3002	; it's needed routine?
+		bge.w	@rts			; if not, branch
 		
-		subq.w	#1,$FFFF3000
-		beq.s	@cont
+		subq.w	#1,$FFFF3000	; sutract #1 from timer
+		beq.s	@cont			; if it's zero, branch
 		rts
 		
-@cont	move.w	#3,$FFFF3000
-		moveq	#3,d2
-		lea		$FFFFFB22,a0
-@loop	jsr		RandomNumber
-		btst	d2,d0
-		beq.s	@off
-		move.w	#$000A,(a0)+
-		jmp		@dbf
-@off	move.w	#$0000,(a0)+
-@dbf	dbf		d2,@loop
+@cont	move.w	#3,$FFFF3000	; set timer again
+		moveq	#3,d2			; move blink counter
+		lea		$FFFFFB22,a0	; load pallete address
+@loop	jsr		RandomNumber	; get random
+		btst	d2,d0			; get only one bit
+		beq.s	@off			; if it's zero, branch
+		move.w	#$000A,(a0)+	; move red color
+		jmp		@dbf			; jump
+@off	move.w	#$0000,(a0)+	; move black color
+@dbf	dbf		d2,@loop		; loop
 		rts
 ; ---------------------------------------------------------------------------
 @Action:
@@ -132,7 +132,7 @@ CutsceneScreen_Loop:
 		LoadArtUnc	Dino_Art, 1600, $0FC0
 		LoadPal		Main_Pal, $A0, 16
 		
-		move.b	#3,$FFFF8000
+		move.b	#3,$FFFF8000	; create dots object
 		
 		addq.b	#2,$FFFF3002	; next routine
 		move.w	#3,$FFFF3004	; set timer
@@ -161,15 +161,15 @@ CutsceneScreen_Loop:
 @RemoveDino:
 		addq.b	#2,$FFFF3002	; next routine
 		move.w	#60,$FFFF3004	; set timer
-		lea		$FFFF8000,a0
-		jmp		DeleteObject
+		lea		$FFFF8000,a0	; load Dino
+		jmp		DeleteObject	; delete Dino
 ; ---------------------------------------------------------------------------
 @rts:
 		rts
 ; ---------------------------------------------------------------------------
 @FillPalWhite:
-		move.l	#$0EEE0EEE,(a0)+
-		dbf		d0,@FillPalWhite
+		move.l	#$0EEE0EEE,(a0)+	; fill with white
+		dbf		d0,@FillPalWhite	; loop
 		rts
 ; ===========================================================================
 ; Graphic Data
